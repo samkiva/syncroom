@@ -3,8 +3,7 @@
 Real-time micro-events for students, developers, and communities.
 
 ## Live Demo
-https://sync-room-oftef0z89-hexsentiels-projects.vercel.app/
-
+https://syncroom-ke.vercel.app
 ## Features
 - Create and join time-limited rooms (15, 30, 45, 60 min)
 - Real-time live chat
