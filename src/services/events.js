@@ -34,19 +34,6 @@ export const createEvent = async (title, category, duration, userId) => {
   return docRef.id;
 };
 
-export const getActiveEvents = async () => {
-  const eventsCollection = collection(db, "events");
-  const now = Timestamp.fromDate(new Date());
-  
-  const q = query(eventsCollection, where("expiresAt", ">", now));
-  const snapshot = await getDocs(q);
-  
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  }));
-};
-
 export const joinEvent = async (eventId, user, displayName, focus) => {
   const participantRef = doc(db, "events", eventId, "participants", user.uid);
   await setDoc(participantRef, {

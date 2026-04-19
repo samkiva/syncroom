@@ -13,6 +13,7 @@ const Room = () => {
   const { user } = useAuth();
   
   const [eventData, setEventData] = useState(null);
+  const [notFound, setNotFound] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
@@ -58,22 +59,26 @@ const Room = () => {
     if (!user || !eventId) return;
     const eventRef = doc(db, 'events', eventId);
     const unsubEvent = onSnapshot(eventRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        setEventData(data);
-        // Immediately derive ended state from the incoming snapshot
-        const expireTime =
-          typeof data.expiresAt?.toDate === 'function'
-            ? data.expiresAt.toDate().getTime()
-            : new Date(data.expiresAt).getTime();
-        if (expireTime <= Date.now()) {
-          setIsEnded(true);
-          setTimeLeft(0);
-        } else {
-          // Reset in case a re-opened or re-used room
-          setIsEnded(false);
-        }
+      if (!docSnap.exists()) {
+        setNotFound(true);
+        return;
       }
+      const data = docSnap.data();
+      setEventData(data);
+      // Immediately derive ended state from the incoming snapshot
+      const expireTime =
+        typeof data.expiresAt?.toDate === 'function'
+          ? data.expiresAt.toDate().getTime()
+          : new Date(data.expiresAt).getTime();
+      if (expireTime <= Date.now()) {
+        setIsEnded(true);
+        setTimeLeft(0);
+      } else {
+        setIsEnded(false);
+      }
+    }, () => {
+      // On permission error or network failure, treat as not found
+      setNotFound(true);
     });
     return () => unsubEvent();
   }, [user, eventId]);
@@ -179,6 +184,17 @@ const Room = () => {
   };
 
   if (!user) return <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>Initializing secure connection...</div>;
+
+  if (notFound) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9FAFB' }}>
+      <div style={{ textAlign: 'center', maxWidth: '400px', padding: '40px 24px' }}>
+        <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔒</div>
+        <h2 style={{ marginBottom: '12px', color: '#111827' }}>Room Not Found</h2>
+        <p style={{ color: '#6B7280', lineHeight: '1.6' }}>This room does not exist or has ended. Ask your host for a new invite link.</p>
+      </div>
+    </div>
+  );
+
   if (!eventData) return <div style={{ padding: '40px', textAlign: 'center', color: '#6B7280' }}>Loading room data...</div>;
 
   // Render Join Interceptor
