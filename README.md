@@ -1,16 +1,39 @@
-# React + Vite
+# SyncRoom
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Real-time micro-events for students, developers, and communities.
 
-Currently, two official plugins are available:
+## Live Demo
+https://sync-room-oftef0z89-hexsentiels-projects.vercel.app/
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Features
+- Create and join time-limited rooms (15, 30, 45, 60 min)
+- Real-time live chat
+- Participant presence
+- Auto-expiring sessions with countdown timer
+- Anonymous authentication — no sign-up required
+- Categories: Study, Coding, Prayer, Chill
 
-## React Compiler
+## Tech Stack
+- React + Vite
+- Firebase Auth (Anonymous)
+- Cloud Firestore
+- React Router DOM
+- Vercel (deployment)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Local Setup
+1. Clone the repo
+2. npm install
+3. Copy .env.example to .env and add your Firebase values
+4. Enable Anonymous Auth in Firebase Console
+5. npm run dev
 
-## Expanding the ESLint configuration
+## Environment Variables
+VITE_FIREBASE_API_KEY
+VITE_FIREBASE_AUTH_DOMAIN
+VITE_FIREBASE_PROJECT_ID
+VITE_FIREBASE_STORAGE_BUCKET
+VITE_FIREBASE_MESSAGING_SENDER_ID
+VITE_FIREBASE_APP_ID
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Author
+HexSentinel — https://github.com/samkiva
