@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createEvent, getActiveEvents } from '../services/events';
 import { useAuth } from '../hooks/useAuth';
+import { formatDuration } from '../utils/time';
 
 const Home = () => {
   const { user } = useAuth();
@@ -104,7 +105,7 @@ const Home = () => {
               <div key={event.id} className="event-item">
                 <div className="event-info">
                   <h3>{event.title}</h3>
-                  <p>{event.category ? `${event.category} • ` : ''}{event.duration} mins allocation</p>
+                  <p>{event.category ? `${event.category} • ` : ''}{formatDuration(event.duration * 60 * 1000)} allocation</p>
                 </div>
                 <button className="btn-secondary" onClick={() => navigate(`/room/${event.id}`)}>Join Session</button>
               </div>

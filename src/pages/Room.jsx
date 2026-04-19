@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import { joinEvent, leaveEvent, subscribeToParticipants, endEventEarly } from '../services/events';
 import { sendMessage, subscribeToMessages } from '../services/chat';
 import { useAuth } from '../hooks/useAuth';
+import { formatDuration } from '../utils/time';
 
 const Room = () => {
   const { eventId } = useParams();
@@ -26,39 +27,55 @@ const Room = () => {
 
   const messagesEndRef = useRef(null);
   const originalTitle = useRef(document.title);
+  const lastMessageId = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messages.length === 0) return;
     
-    // Tab Notification logic
-    setTimeout(() => {
-      if (messages.length > 0 && document.hidden) {
-        const lastMsg = messages[messages.length - 1];
-        if (user && lastMsg.userId !== user.uid) {
-          document.title = "💬 New Message - SyncRoom";
-          const handleVis = () => {
-            if (!document.hidden) {
-              document.title = originalTitle.current;
-              document.removeEventListener('visibilitychange', handleVis);
-            }
-          };
-          document.addEventListener('visibilitychange', handleVis);
+    const lastMsg = messages[messages.length - 1];
+    
+    // Only notify if it's a NEW message from SOMEONE ELSE while the tab is HIDDEN
+    if (document.hidden && lastMsg.id !== lastMessageId.current && user && lastMsg.userId !== user.uid) {
+      document.title = "💬 New Message - SyncRoom";
+      
+      const handleVis = () => {
+        if (!document.hidden) {
+          document.title = originalTitle.current;
+          document.removeEventListener('visibilitychange', handleVis);
         }
-      }
-    }, 100);
+      };
+      document.addEventListener('visibilitychange', handleVis);
+    }
+    
+    // Update last seen ID
+    lastMessageId.current = lastMsg.id;
+    
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, user?.uid]);
 
-  // Initial event data fetch
+  // Real-time event data subscription — covers End Early updates
   useEffect(() => {
     if (!user || !eventId) return;
-    const fetchEvent = async () => {
-      const eventRef = doc(db, 'events', eventId);
-      const eventSnap = await getDoc(eventRef);
-      if (eventSnap.exists()) {
-        setEventData(eventSnap.data());
+    const eventRef = doc(db, 'events', eventId);
+    const unsubEvent = onSnapshot(eventRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setEventData(data);
+        // Immediately derive ended state from the incoming snapshot
+        const expireTime =
+          typeof data.expiresAt?.toDate === 'function'
+            ? data.expiresAt.toDate().getTime()
+            : new Date(data.expiresAt).getTime();
+        if (expireTime <= Date.now()) {
+          setIsEnded(true);
+          setTimeLeft(0);
+        } else {
+          // Reset in case a re-opened or re-used room
+          setIsEnded(false);
+        }
       }
-    };
-    fetchEvent();
+    });
+    return () => unsubEvent();
   }, [user, eventId]);
 
   // Join execution and subscriptions
@@ -91,14 +108,15 @@ const Room = () => {
     };
   }, [user, eventId, hasJoined, profileName, profileFocus]);
 
-  // Timer logic
+  // Countdown timer — only runs while the session is still active
   useEffect(() => {
-    if (!eventData?.expiresAt) return;
-    
-    const expireTime = typeof eventData.expiresAt.toDate === 'function' 
-      ? eventData.expiresAt.toDate().getTime() 
-      : new Date(eventData.expiresAt).getTime();
-    
+    if (!eventData?.expiresAt || isEnded) return;
+
+    const expireTime =
+      typeof eventData.expiresAt.toDate === 'function'
+        ? eventData.expiresAt.toDate().getTime()
+        : new Date(eventData.expiresAt).getTime();
+
     const updateTime = () => {
       const remainingMs = Math.max(0, expireTime - Date.now());
       if (remainingMs === 0) {
@@ -108,11 +126,11 @@ const Room = () => {
         setTimeLeft(remainingMs);
       }
     };
-    
+
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, [eventData]);
+  }, [eventData, isEnded]);
 
   const handleJoinSubmit = (e) => {
     e.preventDefault();
@@ -135,10 +153,7 @@ const Room = () => {
 
   const formatTime = (ms) => {
     if (ms === null) return '--:--';
-    const totalSeconds = Math.floor(ms / 1000);
-    const m = Math.floor(totalSeconds / 60);
-    const s = totalSeconds % 60;
-    return `${m}:${s.toString().padStart(2, '0')}`;
+    return formatDuration(ms);
   };
 
   const handleCopyLink = () => {
