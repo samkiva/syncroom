@@ -242,25 +242,25 @@ const Room = () => {
   return (
     <div style={{ backgroundColor: '#F9FAFB', minHeight: '100vh' }}>
       <header className="room-header">
-        <div>
-          <h2 style={{ fontSize: '1.25rem', marginBottom: '4px' }}>{eventData.title || 'Untitled Session'}</h2>
-          <span style={{ fontSize: '0.85rem', color: '#4F46E5', fontWeight: '500', background: '#EEF2FF', padding: '4px 8px', borderRadius: '4px' }}>
+        <div className="room-header-title">
+          <h2>{eventData.title || 'Untitled Session'}</h2>
+          <span style={{ fontSize: '0.8rem', color: '#4F46E5', fontWeight: '500', background: '#EEF2FF', padding: '3px 8px', borderRadius: '4px' }}>
             {eventData.category}
           </span>
         </div>
         <div className={`room-timer ${isDangerTime && !isEnded ? 'danger' : ''}`}>
           {isEnded ? <span style={{ color: '#EF4444' }}>Ended</span> : formatTime(timeLeft)}
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="room-header-actions">
           {user.uid === eventData.hostId && !isEnded && (
             <button className="btn-outline" style={{ color: '#EF4444', borderColor: '#FCA5A5' }} onClick={handleEndEarly}>
               End Early
             </button>
           )}
           <button className="btn-outline" onClick={handleCopyLink}>
-            {copied ? 'Copied!' : 'Share Link'}
+            {copied ? 'Copied!' : 'Share'}
           </button>
-          <button className="btn-secondary" onClick={() => navigate('/')}>Leave Session</button>
+          <button className="btn-secondary" onClick={() => navigate('/')}>Leave</button>
         </div>
       </header>
 
