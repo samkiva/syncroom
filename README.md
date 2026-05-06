@@ -1,39 +1,72 @@
-# SyncRoom
+# SyncRoom 🔴
+> Real-time micro-events PWA for students — create a room, share the link, sync instantly.
 
-Real-time micro-events for students, developers, and communities.
+![React](https://img.shields.io/badge/React-Vite-61DAFB?style=flat-square)
+![Firebase](https://img.shields.io/badge/Backend-Firebase-FFCA28?style=flat-square)
+![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?style=flat-square)
+![Live](https://img.shields.io/badge/Live-syncroom--ke.vercel.app-black?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-## Live Demo
-[SyncRoom App](https://syncroom-ke.vercel.app)
+🌐 **Live Demo:** [syncroom-ke.vercel.app](https://syncroom-ke.vercel.app)
+
+---
+
+## What It Does
+SyncRoom lets students spin up private, invite-only real-time rooms instantly — no accounts, no friction. Share a link, join the room, collaborate in sync.
+
+---
 
 ## Features
-- Create and join time-limited rooms (15, 30, 45, 60 min)
-- Real-time live chat
-- Participant presence
-- Auto-expiring sessions with countdown timer
-- Anonymous authentication — no sign-up required
-- Categories: Study, Coding, Prayer, Chill
+- 🔒 Private invite-only rooms with unique room codes
+- ⚡ Real-time sync powered by Firebase Realtime Database
+- 📱 Fully responsive — works on mobile and desktop
+- 📲 PWA installable — add to home screen like a native app
+- 🚀 No signup required to join a room
+
+---
 
 ## Tech Stack
-- React + Vite
-- Firebase Auth (Anonymous)
-- Cloud Firestore
-- React Router DOM
-- Vercel (deployment)
+| Layer | Technology |
+|---|---|
+| Frontend | React + Vite |
+| Backend / Realtime | Firebase Realtime Database |
+| Auth | Firebase Anonymous Auth |
+| Deployment | Vercel |
+| PWA | Vite PWA Plugin |
 
-## Local Setup
-1. Clone the repo
-2. npm install
-3. Copy .env.example to .env and add your Firebase values
-4. Enable Anonymous Auth in Firebase Console
-5. npm run dev
+---
 
-## Environment Variables
-VITE_FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID
-VITE_FIREBASE_STORAGE_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID
-VITE_FIREBASE_APP_ID
+## Run Locally
+```bash
+git clone https://github.com/samkiva/syncroom.git
+cd syncroom
+npm install
+npm run dev
+```
+
+> Add your Firebase config to `.env.local` before running.
+
+---
+
+## Architecture
+```
+Client (React/Vite PWA)
+        │
+        ▼
+Firebase Realtime DB ◄──► All connected room clients
+```
+All room state (participants, events) lives in Firebase and propagates to every connected client in real time — no polling, no delays.
+
+---
+
+## Use Cases
+- Study group coordination
+- Campus event check-ins
+- Real-time Q&A sessions during lectures
+- Group countdown timers / shared focus sessions
+
+---
 
 ## Author
-HexSentinel — https://github.com/samkiva
+**Samuel Kivairu** — [@samkiva](https://github.com/samkiva)  
+Statistics & Data Science | University of Nairobi
